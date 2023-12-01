@@ -75,7 +75,7 @@ router.post('/login', validationRulesLogin, async (req, res) => {
 
     const data = {
         userId: {
-            id: newUser.id
+            id: user.id
         }
     }
 

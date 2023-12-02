@@ -38,12 +38,12 @@ router.post('/addNote' , fetchUser , noteValidation , (req, res) => {
 });
 
 router.put('/updateNote/:id' , fetchUser , async (req, res) => {
-    const Curruser = req.userId.id;
+    const currUser = req.userId.id;
     const {title , description , tag} = req.body;
 
     const note = await Notes.findById(req.params.id);
 
-    if(note.user != Curruser) {
+    if(note.user != currUser) {
         return res.status(401).send({error : 'Access denied'});
     }
 
@@ -57,6 +57,25 @@ router.put('/updateNote/:id' , fetchUser , async (req, res) => {
     const updatedNote = await Notes.findByIdAndUpdate(req.params.id , {$set : note} , {new : true});
     
     return res.send(updatedNote);
+})
+
+router.delete('/deleteNote/:id' , fetchUser , async (req, res) => {
+    const currUser = req.userId.id;
+
+    const note = await Notes.findById(req.params.id);
+    
+    if(!note)
+        return res.status(404).send({error : 'no note with such id'});
+
+    if(currUser != note.user)
+        return res.status(401).send({error : 'Access Denied'});
+    
+    try {
+        await Notes.deleteOne({ _id : req.params.id });
+        return res.status(200).send({message : `Delete note with title ${note.title}`});
+    } catch(error) {
+        return res.status(500).send({error : 'internal server error'});
+    }
 })
 
 module.exports = router;
